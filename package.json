@@ -1,0 +1,16 @@
+{
+  "name": "qa-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Learning QA portfolio with Playwright UI and API tests",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test tests/ui",
+    "test:api": "playwright test tests/api",
+    "test:headed": "playwright test tests/ui --headed",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0"
+  }
+}
