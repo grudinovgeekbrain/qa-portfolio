@@ -1,0 +1,109 @@
+{
+  "info": {
+    "name": "QA Portfolio — Fake Store API",
+    "description": "Учебная коллекция для позитивных GET и POST проверок. Fake Store API является демонстрационным сервисом; успешный POST не доказывает постоянное сохранение записи.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /products — validate product list",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://fakestoreapi.com/products",
+          "protocol": "https",
+          "host": [
+            "fakestoreapi",
+            "com"
+          ],
+          "path": [
+            "products"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Content-Type is JSON', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });",
+              "const products = pm.response.json();",
+              "pm.test('Response is a non-empty array', function () { pm.expect(products).to.be.an('array').that.is.not.empty; });",
+              "pm.test('Products contain expected fields and valid types', function () {",
+              "  products.forEach((product) => {",
+              "    pm.expect(product).to.have.property('id'); pm.expect(product).to.have.property('title'); pm.expect(product).to.have.property('price');",
+              "    pm.expect(product).to.have.property('description'); pm.expect(product).to.have.property('category'); pm.expect(product).to.have.property('image');",
+              "    pm.expect(product.id).to.be.a('number'); pm.expect(product.title).to.be.a('string').and.not.empty;",
+              "    pm.expect(product.price).to.be.a('number').and.to.be.at.least(0); pm.expect(Number.isFinite(product.price)).to.equal(true);",
+              "    pm.expect(product.description).to.be.a('string'); pm.expect(product.category).to.be.a('string'); pm.expect(product.image).to.be.a('string');",
+              "  });",
+              "});",
+              "pm.test('Product IDs are unique', function () { const ids = products.map((product) => product.id); pm.expect(new Set(ids).size).to.equal(ids.length); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /products — send test product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"QA Portfolio Test Product\",\n  \"price\": 42.5,\n  \"description\": \"Temporary product payload for API test practice\",\n  \"image\": \"https://example.com/qa-portfolio-test-product.png\",\n  \"category\": \"electronics\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fakestoreapi.com/products",
+          "protocol": "https",
+          "host": [
+            "fakestoreapi",
+            "com"
+          ],
+          "path": [
+            "products"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const expected = { title: 'QA Portfolio Test Product', price: 42.5, description: 'Temporary product payload for API test practice', image: 'https://example.com/qa-portfolio-test-product.png', category: 'electronics' };",
+              "pm.test('Status is an accepted success status (200 or 201)', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+              "pm.test('Content-Type is JSON', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });",
+              "const createdProduct = pm.response.json();",
+              "pm.test('Response contains the submitted product fields', function () { pm.expect(createdProduct).to.deep.include(expected); });",
+              "pm.test('Response includes a numeric ID', function () { pm.expect(createdProduct).to.have.property('id'); pm.expect(createdProduct.id).to.be.a('number'); });",
+              "// Demo API response does not prove persistent storage."
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
